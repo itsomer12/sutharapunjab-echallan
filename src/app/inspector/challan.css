@@ -1,0 +1,637 @@
+/* Variables for the form/receipt */
+.challan-portal {
+  --accent:        hsl(var(--primary));
+  --bg-card:       hsl(var(--surface-card));
+  --text-primary:  hsl(var(--ink));
+  --text-label:    hsl(var(--ink));
+  /* --border stays as root HSL components; use hsl(var(--border)) below */
+  --error:         hsl(var(--danger));
+  --gray-50:       hsl(var(--surface-inset));
+  --gray-200:      hsl(var(--border));
+  --gray-300:      hsl(var(--border));
+  --gray-500:      hsl(var(--ink-tertiary));
+  --gray-600:      hsl(var(--ink-secondary));
+  --green-50:      hsl(var(--primary-subtle));
+  --green-700:     hsl(var(--primary));
+  --green-800:     hsl(var(--primary-hover));
+  --white:         hsl(var(--surface-card));
+
+  --radius:    6px;
+  --radius-sm: 4px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.12);
+  --shadow-receipt-preview: 0 8px 20px rgba(28,25,23,0.14), 0 1px 2px rgba(28,25,23,0.10);
+}
+
+/* Notice number reveal — section 5: cross-fade + scale 0.95→1 over 400ms ease-out */
+@keyframes notice-reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.challan-portal * {
+  box-sizing: border-box;
+}
+
+.challan-portal .form-header-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid hsl(var(--border));
+}
+
+.challan-portal .form-header-card h2 {
+  color: var(--text-primary);
+  font-size: 1.375rem; /* page title size */
+  font-weight: 600;
+  margin: 0;
+}
+
+.challan-portal .form-header-card .step-badge {
+  background: var(--gray-50);
+  color: var(--text-primary);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem; /* badge size */
+  font-weight: 500;
+  border: 1px solid hsl(var(--border));
+}
+
+.challan-portal .info-callout {
+  background: var(--gray-50);
+  border: 1px solid hsl(var(--border));
+  border-left: 3px solid var(--accent);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.5rem;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+}
+
+.challan-portal .tip-copy-mobile {
+  display: none;
+}
+
+.challan-portal fieldset {
+  background: var(--bg-card);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  padding: 0;
+}
+
+.challan-portal .fieldset-header {
+  background: transparent;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.9375rem; /* section size */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.challan-portal .fieldset-body {
+  padding: 1.5rem;
+}
+
+.challan-portal .field-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.challan-portal .field-row .half {
+  flex: 1;
+  min-width: 0;
+}
+
+.challan-portal .field-group {
+  margin-bottom: 1.25rem;
+}
+
+.challan-portal .field-group:last-child {
+  margin-bottom: 0;
+}
+
+.challan-portal .field-group label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 400; /* updated to regular weight */
+  color: var(--text-label);
+  margin-bottom: 0.4rem;
+}
+
+.challan-portal .field-group label small {
+  color: var(--gray-500);
+  font-weight: 400;
+}
+
+.challan-portal .req {
+  color: var(--error);
+}
+
+.challan-portal .field-group input,
+.challan-portal .field-group textarea,
+.challan-portal .field-group select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.challan-portal .field-group input[readonly],
+.challan-portal .field-group select[readonly] {
+  background: var(--gray-50);
+  color: var(--gray-500);
+  cursor: not-allowed;
+}
+
+/* Assigned notice number: primary ink + reveal animation (overrides readonly muted color) */
+.challan-portal .field-group input.notice-number-reveal {
+  color: var(--accent);
+  font-weight: 600;
+  animation: notice-reveal 400ms ease-out forwards;
+}
+
+.challan-portal .field-group select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2357534E'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}
+
+.challan-portal .field-group input:not([readonly]):focus,
+.challan-portal .field-group textarea:not([readonly]):focus,
+.challan-portal .field-group select:not([readonly]):focus {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.25);
+}
+
+.challan-portal .field-group input.invalid,
+.challan-portal .field-group textarea.invalid,
+.challan-portal .field-group select.invalid {
+  border-color: var(--error);
+  background: hsl(var(--danger-subtle));
+}
+
+.challan-portal #validation-msg {
+  background: hsl(var(--danger-subtle));
+  color: hsl(var(--danger-text));
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  border: 1px solid hsl(var(--danger) / 0.2);
+}
+
+.challan-portal .form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.challan-portal #print-btn {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.challan-portal #print-btn:hover {
+  background: var(--gray-50);
+}
+
+.challan-portal #generate-btn {
+  flex: 2;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--primary-on));
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.challan-portal #generate-btn:hover:not(:disabled) {
+  background: hsl(var(--primary-hover));
+}
+
+.challan-portal #generate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.challan-portal .preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.challan-portal .preview-header h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.challan-portal #preview-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 2rem;
+  border: 1px solid hsl(var(--border)); /* standard border */
+  display: flex;
+  justify-content: center;
+  position: relative;
+  overflow: auto;
+}
+
+.challan-portal #preview-card::before {
+  content: 'THERMAL PRINTER PREVIEW';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--gray-50);
+  color: var(--gray-500);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.2rem 1rem;
+  border-radius: 12px;
+  letter-spacing: 0.05em;
+  border: 1px solid hsl(var(--border));
+}
+
+/* Screen chrome only: the receipt remains unchanged for print/PDF capture. */
+@media screen {
+  .challan-portal #preview-card #print-root {
+    box-shadow: var(--shadow-receipt-preview);
+  }
+}
+
+/* Mobile Tabs */
+@media (max-width: 768px) {
+  .challan-portal .tip-copy-desktop {
+    display: none;
+  }
+
+  .challan-portal .tip-copy-mobile {
+    display: inline;
+  }
+
+  .challan-portal .field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .challan-portal .mobile-tabs {
+    display: flex;
+    background: transparent;
+    border-radius: 0;
+    border-bottom: 1px solid hsl(var(--border));
+    margin-bottom: 1.5rem;
+    padding: 0;
+    gap: 1rem;
+  }
+  .challan-portal .mobile-tab {
+    flex: none;
+    text-align: center;
+    padding: 0.75rem 0.25rem;
+    color: var(--gray-500);
+    font-weight: 500;
+    border-radius: 0;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .challan-portal .mobile-tab.active {
+    background: transparent;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--accent);
+  }
+  
+  .challan-portal .form-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--bg-card);
+    padding: 1rem;
+    margin: 0;
+    z-index: 50;
+    border-top: 1px solid hsl(var(--border));
+  }
+}
+
+/* 80mm thermal receipt */
+.challan-portal #challan-preview {
+  width: 302px;                       /* 80mm @ 96dpi */
+  padding: 17px;                      /* ~4.5mm */
+  background: #ffffff;
+  color: #000000;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+.challan-portal .logo-row {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 5px;
+}
+
+.challan-portal .logo-cell {
+  width: 50%;
+  text-align: center;
+  padding: 2px 4px;
+  vertical-align: middle;
+  border: none;
+}
+
+.challan-portal .logo-img {
+  width: 53px;                        /* ~14mm */
+  height: auto;
+  display: inline-block;
+}
+
+.challan-portal .header-line {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.challan-portal .govt-name {
+  font-weight: bold;
+  font-size: 11pt;
+  margin-top: 3px;
+}
+
+.challan-portal .agency-name {
+  font-weight: bold;
+  font-size: 10.5pt;
+}
+
+.challan-portal .echallan-title {
+  font-weight: bold;
+  font-size: 17pt;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+  margin-bottom: 2px;
+}
+
+.challan-portal .warning-subtitle {
+  font-weight: bold;
+  font-size: 9.5pt;
+}
+
+.challan-portal .notice-no-line {
+  font-weight: bold;
+  font-size: 10pt;
+  margin-top: 4px;
+}
+
+.challan-portal .notice-no-line .value-italic {
+  font-style: italic;
+  font-weight: normal;
+}
+
+.challan-portal .legal-ref {
+  font-style: italic;
+  font-size: 8.5pt;
+  line-height: 1.35;
+}
+
+.challan-portal .blank-line {
+  height: 8px;
+}
+
+.challan-portal .section-bar {
+  background: #000000 !important;
+  color: #ffffff !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  font-weight: bold;
+  font-size: 12pt;
+  text-align: center;
+  padding: 3px 4px;
+  margin: 7px 0 5px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.challan-portal .detail-block {
+  margin-bottom: 5px;
+}
+
+.challan-portal .detail-label {
+  font-weight: bold;
+  font-size: 10.5pt;
+  margin: 0;
+  text-transform: uppercase;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
+.challan-portal .detail-value {
+  font-style: italic;
+  font-size: 12pt;
+  margin: 0;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.challan-portal .violation-quote {
+  font-style: italic;
+  font-size: 12pt;
+  font-weight: bold;
+  margin: 3px 0;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.challan-portal .warning-bar {
+  font-size: 9.5pt;
+}
+.challan-portal .warning-block {
+  margin: 5px 0;
+}
+
+.challan-portal .violation-photo-block {
+  margin: 5px 0;
+  text-align: center;
+}
+.challan-portal .violation-photo {
+  width: 180px;
+  height: auto;
+  margin: 4px auto 0;
+  display: block;
+  border: 1px solid #000;
+}
+
+.challan-portal .warning-primary {
+  font-weight: bold;
+  font-size: 10.5pt;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.challan-portal .warning-secondary {
+  font-weight: normal;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  text-align: justify;
+}
+
+.challan-portal .footer-line {
+  text-align: center;
+  margin: 0;
+}
+
+.challan-portal .helpline {
+  font-weight: bold;
+  font-size: 11pt;
+}
+
+.challan-portal .disclaimer {
+  font-style: italic;
+  font-size: 8.5pt;
+}
+
+.challan-portal .end-rule {
+  font-size: 8.5pt;
+  margin-top: 3px;
+}
+
+@media print {
+  @page { margin: 0; }
+
+  /* Hide everything visually (inherited — children can override) */
+  body {
+    visibility: hidden;
+  }
+
+  /* Reset Shell layout constraints so content can flow to the page */
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide Shell chrome (sidebar, mobile header, mobile bottom nav) */
+  aside,
+  body > div > div > header,
+  body > div > div > nav {
+    display: none !important;
+  }
+
+  /* Reset main content wrapper — remove height lock and overflow clip */
+  main {
+    overflow: visible !important;
+    padding: 0 !important;
+    height: auto !important;
+    flex: none !important;
+  }
+
+  /* Hide form panel and other non-receipt UI */
+  #form-panel,
+  .mobile-tabs,
+  .preview-header,
+  .form-actions,
+  #preview-card::before {
+    display: none !important;
+  }
+
+  /* Force the entire ancestor chain of #print-root to be rendered */
+  .challan-portal,
+  #app-container,
+  #preview-panel,
+  #preview-card {
+    display: block !important;
+    position: static !important;
+    overflow: visible !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    flex: none !important;
+    top: auto !important;
+  }
+
+  /* Strip card decorations from preview wrapper */
+  #preview-card {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  #preview-panel {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Position the receipt at the top of the page, escaping ancestor layout */
+  #print-root {
+    visibility: visible !important;
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    z-index: 99999;
+  }
+
+  /* Make all receipt children visible */
+  #print-root * {
+    visibility: visible !important;
+  }
+
+  /* Preserve receipt styling */
+  #challan-preview {
+    visibility: visible !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Preserve section bar colors in print */
+  .challan-portal .section-bar {
+    background: #000000 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}

@@ -1,0 +1,26 @@
+2026-09-04 14:38:27.799 PKT [10164] LOG:  starting PostgreSQL 16.4, compiled by Visual C++ build 1940, 64-bit
+2026-09-04 14:38:27.832 PKT [10164] LOG:  listening on IPv6 address "::1", port 5432
+2026-09-04 14:38:27.833 PKT [10164] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-09-04 14:38:28.065 PKT [28332] LOG:  database system was shut down at 2026-09-04 14:38:24 PKT
+2026-09-04 14:38:28.139 PKT [10164] LOG:  database system is ready to accept connections
+2026-09-04 20:43:52.955 PKT [11036] LOG:  starting PostgreSQL 16.4, compiled by Visual C++ build 1940, 64-bit
+2026-09-04 20:43:52.962 PKT [11036] LOG:  listening on IPv6 address "::1", port 5432
+2026-09-04 20:43:52.962 PKT [11036] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-09-04 20:43:53.075 PKT [4676] LOG:  database system was interrupted; last known up at 2026-09-04 16:40:53 PKT
+2026-09-04 20:43:56.564 PKT [4676] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-09-04 20:43:56.571 PKT [4676] LOG:  redo starts at 0/230FDA8
+2026-09-04 20:43:56.571 PKT [4676] LOG:  invalid record length at 0/230FE90: expected at least 24, got 0
+2026-09-04 20:43:56.571 PKT [4676] LOG:  redo done at 0/230FE58 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-09-04 20:43:56.579 PKT [23260] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-09-04 20:43:56.595 PKT [23260] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.002 s, total=0.017 s; sync files=2, longest=0.002 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/230FE90, redo lsn=0/230FE90
+2026-09-04 20:43:56.660 PKT [11036] LOG:  database system is ready to accept connections
+2026-09-04 20:44:42.343 PKT [5636] LOG:  starting PostgreSQL 16.4, compiled by Visual C++ build 1940, 64-bit
+2026-09-04 20:44:42.353 PKT [5636] LOG:  listening on IPv6 address "::1", port 5432
+2026-09-04 20:44:42.353 PKT [5636] LOG:  listening on IPv4 address "127.0.0.1", port 5432
+2026-09-04 20:44:42.450 PKT [8624] LOG:  database system was interrupted; last known up at 2026-09-04 20:43:56 PKT
+2026-09-04 20:44:43.081 PKT [8624] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-09-04 20:44:43.085 PKT [8624] LOG:  invalid record length at 0/230FF08: expected at least 24, got 0
+2026-09-04 20:44:43.085 PKT [8624] LOG:  redo is not required
+2026-09-04 20:44:43.092 PKT [22372] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-09-04 20:44:43.107 PKT [22372] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.004 s, sync=0.003 s, total=0.018 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/230FF08, redo lsn=0/230FF08
+2026-09-04 20:44:43.139 PKT [5636] LOG:  database system is ready to accept connections

@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  INSPECTOR
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  cnic         String   // format: 00000-0000000-0
+  contactNo    String   @map("contact_no")
+  town         String?  // required for INSPECTOR, nullable for ADMIN
+  staffId      String   @unique @map("staff_id") // Unique staff/badge ID assigned by admin
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  status       Status   @default(ACTIVE)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  challans Challan[]
+
+  @@map("users")
+}
+
+model Challan {
+  id                   Int      @id @default(autoincrement())
+  noticeNo             String   @unique @map("notice_no") // SPA-001, SPA-002, ...
+  createdByUserId      Int      @map("created_by_user_id")
+  createdByUser        User     @relation(fields: [createdByUserId], references: [id])
+
+  // Denormalized inspector data — copied at creation time
+  inspectorName        String   @map("inspector_name")
+  inspectorId          String   @map("inspector_id") // Copied from user.staffId
+  town                 String
+
+  // Violation details
+  datetime             DateTime // violation date/time entered by inspector
+  location             String
+  uc                   String
+  zone                 String
+  tehsil               String
+  district             String
+
+  // Citizen details
+  citizenName          String   @map("citizen_name")
+  citizenCnic          String   @map("citizen_cnic")
+  citizenPhone         String   @map("citizen_phone")
+  citizenAddress       String   @map("citizen_address")
+
+  violationDescription String   @map("violation_description")
+  warningCount         Int      @map("warning_count")
+  violationImageUrl    String?  @map("violation_image_url")
+
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  @@map("challans")
+}
+
+model NoticeCounter {
+  id    Int @id @default(1)
+  value Int @default(0)
+
+  @@map("notice_counter")
+}
