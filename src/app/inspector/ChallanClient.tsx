@@ -490,7 +490,7 @@ ${row('PRIOR WARNING COUNT FOR THIS ID / LOCATION', String(f.warning_count ?? '0
                         const compressedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
                         setViolationImage(compressedFile);
                         setViolationImagePreviewUrl(URL.createObjectURL(compressedBlob));
-                      } catch (err) {
+                      } catch {
                         alert('Failed to compress image.');
                       }
                     }}
