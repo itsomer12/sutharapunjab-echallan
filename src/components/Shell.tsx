@@ -4,17 +4,24 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, Users, FileStack, BarChart3, FilePlus, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, FileStack, BarChart3, FileBarChart, FilePlus, LogOut } from 'lucide-react';
+import { LoadingProvider, useDashboardLoading } from '@/components/DashboardLoading';
 
 export default function Shell({ children, role }: { children: React.ReactNode; role: 'admin' | 'inspector' }) {
+  return <LoadingProvider><DashboardShell role={role}>{children}</DashboardShell></LoadingProvider>;
+}
+
+function DashboardShell({ children, role }: { children: React.ReactNode; role: 'admin' | 'inspector' }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { beginRoute, track } = useDashboardLoading();
 
   const adminLinks = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/entries', label: 'Challans', icon: FileStack },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+    { href: '/admin/reports', label: 'Reports', icon: FileBarChart },
   ];
 
   const inspectorLinks = [
@@ -25,11 +32,12 @@ export default function Shell({ children, role }: { children: React.ReactNode; r
   const isAdmin = role === 'admin';
 
   async function handleLogout() {
+    const endRoute = () => { beginRoute(); router.push('/login'); };
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      router.push('/login');
+      await track(() => fetch('/api/auth/logout', { method: 'POST' }));
+      endRoute();
     } catch {
-      router.push('/login');
+      endRoute();
     }
   }
 
@@ -76,6 +84,7 @@ export default function Shell({ children, role }: { children: React.ReactNode; r
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => { if (!active) beginRoute(); }}
                 className={
                   isAdmin
                     ? `flex items-center gap-2.5 px-3 py-2.5 text-body rounded-sm border-l-[3px] focus:outline-none focus:ring-2 focus:ring-white/40
@@ -154,6 +163,7 @@ export default function Shell({ children, role }: { children: React.ReactNode; r
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => { if (!active) beginRoute(); }}
                 className={`flex flex-col items-center justify-center px-3 py-2 min-h-[48px] min-w-[48px] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring
                   ${active ? 'text-primary font-semibold' : 'text-ink-secondary'}`}
                 aria-current={active ? 'page' : undefined}

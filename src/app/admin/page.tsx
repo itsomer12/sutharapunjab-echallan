@@ -3,7 +3,7 @@ import { verifyToken } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { BarChart3, FileStack } from 'lucide-react';
+import { BarChart3, FileBarChart, FileStack } from 'lucide-react';
 
 export default async function AdminPage() {
   const token = cookies().get('token')?.value;
@@ -71,6 +71,18 @@ export default async function AdminPage() {
             <h2 className="text-section text-ink">Analytics</h2>
             <p className="mt-1 text-caption text-ink-secondary">
               View charts and trends for violation data.
+            </p>
+          </div>
+        </Link>
+        <Link
+          href="/admin/reports"
+          className="flex gap-3 rounded-md border border-border bg-surface-card p-5 transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:shadow-[0_4px_10px_rgba(28,25,23,0.10)] focus-visible:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-border-focus focus-visible:ring-offset-2 focus-visible:shadow-[0_4px_10px_rgba(28,25,23,0.10)]"
+        >
+          <FileBarChart className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
+          <div>
+            <h2 className="text-section text-ink">Reports</h2>
+            <p className="mt-1 text-caption text-ink-secondary">
+              Review a concise date-range summary for management.
             </p>
           </div>
         </Link>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, UserPlus } from 'lucide-react';
 import { TOWNS } from '@/lib/constants';
+import { LoadingOverlay, useDashboardLoading, useSmoothLoading } from '@/components/DashboardLoading';
 
 type User = {
   id: number;
@@ -24,10 +25,13 @@ function TableSkeleton() {
       {/* Desktop skeleton */}
       <div className="hidden md:block">
         <div className="px-6 py-3 bg-surface-inset border-b border-border">
-          <div className="flex gap-8">
-            {['w-32', 'w-28', 'w-20', 'w-24', 'w-16', 'w-12'].map((w, i) => (
-              <div key={i} className={`h-3 ${w} bg-border rounded-sm animate-pulse`} />
-            ))}
+          <div className="grid grid-cols-[1.5fr_1fr_.7fr_.85fr_.7fr_.7fr] gap-4 text-table-head font-semibold text-ink-secondary">
+            <span>Name and Staff ID</span>
+            <span>Contact</span>
+            <span>Town</span>
+            <span>Created</span>
+            <span>Status</span>
+            <span className="text-right">Actions</span>
           </div>
         </div>
         {Array.from({ length: 4 }).map((_, i) => (
@@ -90,6 +94,9 @@ export default function UsersPage() {
 
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [pendingUserId, setPendingUserId] = useState<number | null>(null);
+  const { track } = useDashboardLoading();
+  const tableLoading = useSmoothLoading(loading);
 
   useEffect(() => {
     fetchUsers();
@@ -98,7 +105,7 @@ export default function UsersPage() {
   async function fetchUsers() {
     setFetchError(null);
     try {
-      const res = await fetch('/api/admin/users');
+      const res = await track(() => fetch('/api/admin/users'));
       if (!res.ok) throw new Error('Failed to load inspector accounts. Please try again.');
       const data = await res.json();
       setUsers(data);
@@ -140,15 +147,16 @@ export default function UsersPage() {
 
   async function handleToggleStatus(user: User) {
     const newStatus = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    setPendingUserId(user.id);
     try {
       // Optimistic update
       setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: newStatus } : u));
       
-      const res = await fetch(`/api/admin/users/${user.id}`, {
+      const res = await track(() => fetch(`/api/admin/users/${user.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
-      });
+      }));
 
       if (!res.ok) {
         throw new Error('Failed to update status');
@@ -157,6 +165,8 @@ export default function UsersPage() {
       // Revert on error
       setUsers(prev => prev.map(u => u.id === user.id ? { ...u, status: user.status } : u));
       setFetchError('Failed to update user status. Please try again.');
+    } finally {
+      setPendingUserId(null);
     }
   }
 
@@ -169,11 +179,11 @@ export default function UsersPage() {
       const url = editingUser ? `/api/admin/users/${editingUser.id}` : '/api/admin/users';
       const method = editingUser ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      const res = await track(() => fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
-      });
+      }));
 
       const data = await res.json();
 
@@ -228,8 +238,9 @@ export default function UsersPage() {
         </div>
       )}
 
-      <div className="bg-surface-card rounded-md border border-border overflow-hidden">
-        {loading ? (
+      <div className="relative bg-surface-card rounded-md border border-border overflow-hidden" aria-busy={loading}>
+        <LoadingOverlay show={tableLoading && users.length > 0} label="Refreshing inspector accounts" />
+        {loading && (users.length === 0 || tableLoading) ? (
           <TableSkeleton />
         ) : users.length === 0 && !fetchError ? (
           <div className="p-12 text-center flex flex-col items-center gap-2">
@@ -276,6 +287,7 @@ export default function UsersPage() {
                       <td className="px-6 py-3.5">
                         <button
                           onClick={() => handleToggleStatus(user)}
+                          disabled={pendingUserId === user.id}
                           aria-label={`Toggle ${user.name} status from ${user.status.toLowerCase()}`}
                           className={`inline-flex items-center px-2.5 py-1 rounded-full text-badge border focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-border-focus
                             ${user.status === 'ACTIVE'
@@ -311,7 +323,8 @@ export default function UsersPage() {
                       <div className="text-ink-secondary text-caption mt-1">ID: {user.staffId} &middot; @{user.username}</div>
                     </div>
                     <button
-                      onClick={() => handleToggleStatus(user)}
+                          onClick={() => handleToggleStatus(user)}
+                      disabled={pendingUserId === user.id}
                       aria-label={`Toggle ${user.name} status from ${user.status.toLowerCase()}`}
                       className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-badge border
                         ${user.status === 'ACTIVE'

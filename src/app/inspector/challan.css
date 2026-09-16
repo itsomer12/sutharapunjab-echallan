@@ -195,6 +195,166 @@
   background: hsl(var(--danger-subtle));
 }
 
+/* Violation photo chooser */
+.challan-portal .photo-input {
+  display: none;
+}
+
+.challan-portal .photo-picker {
+  border: 1px dashed hsl(var(--primary) / 0.45);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.055), hsl(var(--primary) / 0.012));
+  overflow: hidden;
+}
+
+.challan-portal .photo-picker-trigger {
+  appearance: none;
+  width: 100%;
+  padding: 1rem 1.125rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  text-align: left;
+  transition: background 160ms ease;
+}
+
+.challan-portal .photo-picker-trigger:hover,
+.challan-portal .photo-picker-trigger:focus-visible {
+  background: hsl(var(--primary) / 0.065);
+  outline: none;
+}
+
+.challan-portal .photo-picker-icon {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.12);
+  border-radius: 0.75rem;
+}
+
+.challan-portal .photo-picker-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.challan-portal .photo-picker-trigger strong,
+.challan-portal .photo-source strong,
+.challan-portal .photo-preview-copy strong {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.challan-portal .photo-picker-trigger small,
+.challan-portal .photo-source small,
+.challan-portal .photo-preview-copy span {
+  display: block;
+  margin-top: 0.125rem;
+  color: var(--gray-500);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.challan-portal .photo-picker-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  padding: 0 1.125rem 1.125rem;
+}
+
+.challan-portal .photo-source {
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  text-align: left;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.challan-portal .photo-source:hover,
+.challan-portal .photo-source:focus-visible {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 3px 10px hsl(var(--primary) / 0.12);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.challan-portal .photo-source.camera {
+  border-color: hsl(var(--primary) / 0.35);
+}
+
+.challan-portal .photo-source svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+  color: hsl(var(--primary));
+}
+
+.challan-portal .photo-preview {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.625rem;
+  border: 1px solid hsl(var(--primary) / 0.25);
+  border-radius: var(--radius-sm);
+  background: hsl(var(--primary) / 0.045);
+}
+
+.challan-portal .photo-preview img {
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.4rem;
+  object-fit: cover;
+}
+
+.challan-portal .photo-preview-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.challan-portal .remove-photo {
+  appearance: none;
+  border: 0;
+  padding: 0.375rem 0.5rem;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--error);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.challan-portal .remove-photo:hover,
+.challan-portal .remove-photo:focus-visible {
+  background: hsl(var(--danger-subtle));
+  outline: none;
+}
+
+.challan-portal .remove-photo svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 .challan-portal #validation-msg {
   background: hsl(var(--danger-subtle));
   color: hsl(var(--danger-text));
@@ -316,6 +476,18 @@
   .challan-portal .field-row {
     flex-direction: column;
     gap: 0;
+  }
+
+  .challan-portal .photo-picker-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .challan-portal .photo-preview {
+    align-items: flex-start;
+  }
+
+  .challan-portal .remove-photo span {
+    display: none;
   }
   
   .challan-portal .mobile-tabs {
@@ -493,11 +665,15 @@
   text-align: center;
 }
 .challan-portal .violation-photo {
-  width: 180px;
+  /* Keep every evidence photo in the same full-width 1:1 print area. */
+  width: 100%;
+  aspect-ratio: 1 / 1;
   height: auto;
   margin: 4px auto 0;
   display: block;
   border: 1px solid #000;
+  object-fit: cover;
+  object-position: center;
 }
 
 .challan-portal .warning-primary {

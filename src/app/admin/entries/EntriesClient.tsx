@@ -28,6 +28,7 @@ import {
 import { AlertTriangle, Search, FileText, Image as ImageIcon } from 'lucide-react';
 import type { Challan } from '../../../../prisma/generated/client/client';
 import { TOWNS } from '@/lib/constants';
+import { EqualizerLoader, useDashboardLoading, useSmoothLoading } from '@/components/DashboardLoading';
 
 const VIOLATION_CATEGORIES = [
   "Illegal Sewage or Drainage Discharge",
@@ -56,7 +57,7 @@ function SkeletonRow() {
     <TableRow>
       {Array.from({ length: 8 }).map((_, i) => (
         <TableCell key={i}>
-          <div className="h-4 bg-surface-inset rounded-sm animate-pulse" style={{ width: `${60 + (i * 7) % 40}%` }} />
+          {i === 0 ? <EqualizerLoader label="Loading challans" /> : <div className="h-4 bg-surface-inset rounded-sm animate-pulse" style={{ width: `${60 + (i * 7) % 40}%` }} />}
         </TableCell>
       ))}
     </TableRow>
@@ -96,6 +97,9 @@ export default function EntriesClient() {
   const [category, setCategory] = useState('all');
 
   const [selectedChallan, setSelectedChallan] = useState<ChallanWithUser | null>(null);
+  const [pendingPage, setPendingPage] = useState<'previous' | 'next' | null>(null);
+  const { track } = useDashboardLoading();
+  const tableLoading = useSmoothLoading(loading);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -111,7 +115,7 @@ export default function EntriesClient() {
       if (town && town !== 'all') params.append('town', town);
       if (category && category !== 'all') params.append('category', category);
 
-      const res = await fetch(`/api/admin/challans?${params.toString()}`);
+      const res = await track(() => fetch(`/api/admin/challans?${params.toString()}`));
       if (!res.ok) throw new Error('Failed to fetch challan data. Please try again.');
       const result = await res.json();
       
@@ -134,6 +138,19 @@ export default function EntriesClient() {
     return () => clearTimeout(handler);
   }, [fetchData]);
 
+  function refreshForFilter(update: () => void) {
+    setLoading(true);
+    update();
+  }
+
+  function changePage(direction: 'previous' | 'next') {
+    setPendingPage(direction);
+    setLoading(true);
+    setPage((current) => direction === 'previous' ? Math.max(1, current - 1) : Math.min(totalPages, current + 1));
+  }
+
+  useEffect(() => { if (!loading) setPendingPage(null); }, [loading]);
+
   return (
     <div className="space-y-4">
       {/* Filters — fully responsive */}
@@ -146,7 +163,7 @@ export default function EntriesClient() {
             placeholder="Search across all fields..."
             className="pl-8"
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => refreshForFilter(() => { setSearch(e.target.value); setPage(1); })}
             aria-label="Search challans"
           />
         </div>
@@ -158,7 +175,7 @@ export default function EntriesClient() {
               id="filter-from-date"
               type="date"
               value={from}
-              onChange={(e) => { setFrom(e.target.value); setPage(1); }}
+              onChange={(e) => refreshForFilter(() => { setFrom(e.target.value); setPage(1); })}
               className="flex-1 min-w-0"
               aria-label="From date"
             />
@@ -166,13 +183,13 @@ export default function EntriesClient() {
               id="filter-to-date"
               type="date"
               value={to}
-              onChange={(e) => { setTo(e.target.value); setPage(1); }}
+              onChange={(e) => refreshForFilter(() => { setTo(e.target.value); setPage(1); })}
               className="flex-1 min-w-0"
               aria-label="To date"
             />
           </div>
           <div className="flex gap-2 flex-1 min-w-0">
-            <Select value={town} onValueChange={(v) => { setTown(v); setPage(1); }}>
+            <Select value={town} onValueChange={(v) => refreshForFilter(() => { setTown(v); setPage(1); })}>
               <SelectTrigger className="flex-1 min-w-0" aria-label="Filter by town">
                 <SelectValue placeholder="All Towns" />
               </SelectTrigger>
@@ -183,7 +200,7 @@ export default function EntriesClient() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
+            <Select value={category} onValueChange={(v) => refreshForFilter(() => { setCategory(v); setPage(1); })}>
               <SelectTrigger className="flex-1 min-w-0" aria-label="Filter by violation category">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
@@ -213,7 +230,7 @@ export default function EntriesClient() {
         </div>
       )}
 
-      <div className="bg-surface-card rounded-md border border-border overflow-hidden">
+      <div className="bg-surface-card rounded-md border border-border overflow-hidden" aria-busy={loading}>
         {/* Desktop Table — sentence-case headers */}
         <div className="hidden md:block overflow-x-auto">
           <Table>
@@ -230,7 +247,7 @@ export default function EntriesClient() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {loading && (data.length === 0 || tableLoading) ? (
                 Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
               ) : data.length === 0 && !error ? (
                 <TableRow>
@@ -303,7 +320,7 @@ export default function EntriesClient() {
 
         {/* Mobile List */}
         <div className="md:hidden divide-y divide-border">
-          {loading ? (
+          {loading && (data.length === 0 || tableLoading) ? (
             Array.from({ length: 4 }).map((_, i) => <MobileSkeletonCard key={i} />)
           ) : data.length === 0 && !error ? (
             <div className="p-12 text-center flex flex-col items-center gap-2">
@@ -369,16 +386,16 @@ export default function EntriesClient() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1 || loading}
+            onClick={() => changePage('previous')}
+            disabled={page === 1 || pendingPage === 'previous'}
           >
             Previous
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages || loading}
+            onClick={() => changePage('next')}
+            disabled={page >= totalPages || pendingPage === 'next'}
           >
             Next
           </Button>

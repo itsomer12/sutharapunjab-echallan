@@ -32,3 +32,8 @@ export type Challan = Prisma.ChallanModel
  * 
  */
 export type NoticeCounter = Prisma.NoticeCounterModel
+/**
+ * Model ReportRecipient
+ * 
+ */
+export type ReportRecipient = Prisma.ReportRecipientModel

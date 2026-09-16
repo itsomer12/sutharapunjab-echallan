@@ -399,7 +399,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   Challan: 'Challan',
-  NoticeCounter: 'NoticeCounter'
+  NoticeCounter: 'NoticeCounter',
+  ReportRecipient: 'ReportRecipient'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -415,7 +416,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "challan" | "noticeCounter"
+    modelProps: "user" | "challan" | "noticeCounter" | "reportRecipient"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -641,6 +642,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReportRecipient: {
+      payload: Prisma.$ReportRecipientPayload<ExtArgs>
+      fields: Prisma.ReportRecipientFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReportRecipientFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReportRecipientFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>
+        }
+        findFirst: {
+          args: Prisma.ReportRecipientFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReportRecipientFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>
+        }
+        findMany: {
+          args: Prisma.ReportRecipientFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>[]
+        }
+        create: {
+          args: Prisma.ReportRecipientCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>
+        }
+        createMany: {
+          args: Prisma.ReportRecipientCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReportRecipientCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>[]
+        }
+        delete: {
+          args: Prisma.ReportRecipientDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>
+        }
+        update: {
+          args: Prisma.ReportRecipientUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReportRecipientDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReportRecipientUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReportRecipientUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReportRecipientUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReportRecipientPayload>
+        }
+        aggregate: {
+          args: Prisma.ReportRecipientAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReportRecipient>
+        }
+        groupBy: {
+          args: Prisma.ReportRecipientGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportRecipientGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReportRecipientCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReportRecipientCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -729,6 +804,17 @@ export const NoticeCounterScalarFieldEnum = {
 } as const
 
 export type NoticeCounterScalarFieldEnum = (typeof NoticeCounterScalarFieldEnum)[keyof typeof NoticeCounterScalarFieldEnum]
+
+
+export const ReportRecipientScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  label: 'label',
+  active: 'active',
+  createdAt: 'createdAt'
+} as const
+
+export type ReportRecipientScalarFieldEnum = (typeof ReportRecipientScalarFieldEnum)[keyof typeof ReportRecipientScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -828,6 +914,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -998,6 +1091,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   challan?: Prisma.ChallanOmit
   noticeCounter?: Prisma.NoticeCounterOmit
+  reportRecipient?: Prisma.ReportRecipientOmit
 }
 
 /* Types for Logging */

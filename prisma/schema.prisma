@@ -78,3 +78,13 @@ model NoticeCounter {
 
   @@map("notice_counter")
 }
+
+model ReportRecipient {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  label     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("report_recipients")
+}

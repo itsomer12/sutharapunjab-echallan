@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Loader2 } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -17,6 +16,7 @@ import {
   Cell,
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
+import { CardSkeleton, LoadingOverlay, useDashboardLoading, useSmoothLoading } from '@/components/DashboardLoading';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -177,10 +177,13 @@ export default function AnalyticsClient() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [pollError, setPollError] = useState<string | null>(null);
+  const { track } = useDashboardLoading();
+  const refreshing = useSmoothLoading(loading);
 
   const fetchAnalytics = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/admin/analytics');
+      const res = await track(() => fetch('/api/admin/analytics'));
       if (!res.ok) throw new Error('Failed to fetch analytics');
       const json: AnalyticsData = await res.json();
       setData(json);
@@ -192,7 +195,7 @@ export default function AnalyticsClient() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [track]);
 
   // Initial fetch
   useEffect(() => {
@@ -208,9 +211,7 @@ export default function AnalyticsClient() {
   /* ---- Loading state ---- */
   if (loading && !data) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-6 w-6 animate-spin text-ink-tertiary" />
-      </div>
+      <CardSkeleton className="h-64" />
     );
   }
 
@@ -249,7 +250,8 @@ export default function AnalyticsClient() {
       </div>
 
       {/* Charts Grid — 2 cols on desktop, stacks on mobile */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-6" aria-busy={loading}>
+        <LoadingOverlay show={refreshing} label="Refreshing analytics" />
         {/* 1 ─ Challan count over time (area chart, --primary fill) */}
         <DashCard
           title="Challans Over Time"

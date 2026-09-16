@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Challan: 'Challan',
-  NoticeCounter: 'NoticeCounter'
+  NoticeCounter: 'NoticeCounter',
+  ReportRecipient: 'ReportRecipient'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -121,6 +122,17 @@ export const NoticeCounterScalarFieldEnum = {
 } as const
 
 export type NoticeCounterScalarFieldEnum = (typeof NoticeCounterScalarFieldEnum)[keyof typeof NoticeCounterScalarFieldEnum]
+
+
+export const ReportRecipientScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  label: 'label',
+  active: 'active',
+  createdAt: 'createdAt'
+} as const
+
+export type ReportRecipientScalarFieldEnum = (typeof ReportRecipientScalarFieldEnum)[keyof typeof ReportRecipientScalarFieldEnum]
 
 
 export const SortOrder = {

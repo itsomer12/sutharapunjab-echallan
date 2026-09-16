@@ -7,9 +7,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { FileText, User, AlertTriangle, Printer, FileDown } from 'lucide-react';
+import { FileText, User, AlertTriangle, Printer, FileDown, Camera, ImagePlus, X } from 'lucide-react';
 import { PUNJAB_GOVT_LOGO, SUTHRA_PUNJAB_LOGO } from './logo-data';
 import { TOWNS } from '@/lib/constants';
+import { EqualizerLoader, useDashboardLoading } from '@/components/DashboardLoading';
 import './challan.css';
 
 const BLANK = '___________';
@@ -72,9 +73,13 @@ export default function ChallanClient({ user }: ChallanClientProps) {
   const [assignedNoticeNo, setAssignedNoticeNo] = useState<string>('');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState(false);
   const [violationImage, setViolationImage] = useState<File | null>(null);
   const [violationImagePreviewUrl, setViolationImagePreviewUrl] = useState<string | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const { track } = useDashboardLoading();
 
   const { register, watch, formState: { errors }, trigger, setValue } = useForm<ChallanFormValues>({
     resolver: zodResolver(challanSchema),
@@ -89,6 +94,40 @@ export default function ChallanClient({ user }: ChallanClientProps) {
       })(),
     }
   });
+
+  const handleViolationPhotoChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    // Resetting lets an inspector choose the same photo again if needed.
+    event.target.value = '';
+    if (!file) return;
+
+    setIsPhotoPickerOpen(false);
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size exceeds the 5 MB limit.');
+      return;
+    }
+
+    try {
+      const compressedBlob = await compressImage(file);
+      const compressedFile = new File(
+        [compressedBlob],
+        `violation-photo-${Date.now()}.jpg`,
+        { type: 'image/jpeg' }
+      );
+      if (violationImagePreviewUrl) URL.revokeObjectURL(violationImagePreviewUrl);
+      setViolationImage(compressedFile);
+      setViolationImagePreviewUrl(URL.createObjectURL(compressedBlob));
+    } catch {
+      alert('This photo could not be prepared. Please choose a JPEG or PNG image.');
+    }
+  };
+
+  const removeViolationPhoto = () => {
+    if (violationImagePreviewUrl) URL.revokeObjectURL(violationImagePreviewUrl);
+    setViolationImage(null);
+    setViolationImagePreviewUrl(null);
+  };
 
   const formValues = watch();
 
@@ -142,10 +181,10 @@ export default function ChallanClient({ user }: ChallanClientProps) {
           const formData = new FormData();
           formData.append('file', violationImage);
 
-          const uploadRes = await fetch('/api/inspector/upload', {
+          const uploadRes = await track(() => fetch('/api/inspector/upload', {
             method: 'POST',
             body: formData,
-          });
+          }));
 
           if (!uploadRes.ok) {
             const errData = await uploadRes.json();
@@ -156,11 +195,11 @@ export default function ChallanClient({ user }: ChallanClientProps) {
           imageUrl = uploadData.url;
         }
 
-        const res = await fetch('/api/inspector/challans', {
+        const res = await track(() => fetch('/api/inspector/challans', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ...formValues, violationImageUrl: imageUrl }),
-        });
+        }));
 
         if (!res.ok) {
           const data = await res.json();
@@ -220,7 +259,7 @@ export default function ChallanClient({ user }: ChallanClientProps) {
     const violationPhotoHtml = violationImagePreviewUrl ? `
 <div style="margin:5px 0;text-align:center;">
   <p style="font-weight:bold;font-size:26pt;margin:0;text-transform:uppercase;line-height:1.35;letter-spacing:0.02em;font-family:Arial,Helvetica,sans-serif;color:#000">VIOLATION PHOTO</p>
-  <img src="${violationImagePreviewUrl}" style="width:180px;height:auto;margin:4px auto 0;display:block;border:1px solid #000;" />
+  <img src="${violationImagePreviewUrl}" alt="Violation photo" style="width:100%;aspect-ratio:1 / 1;height:auto;margin:10px auto 0;display:block;border:1px solid #000;object-fit:cover;object-position:center;" />
 </div>
 ` : '';
 
@@ -357,7 +396,7 @@ ${row('PRIOR WARNING COUNT FOR THIS ID / LOCATION', String(f.warning_count ?? '0
 
       <div id="app-container" className="flex gap-8 max-w-7xl mx-auto">
         {/* LEFT PANEL */}
-        <section id="form-panel" className={`flex-1 ${activeTab === 'form' ? 'block' : 'hidden md:block'}`}>
+        <section id="form-panel" className={`flex-1 ${activeTab === 'form' ? 'block' : 'hidden md:block'}`} aria-busy={isGenerating || isFetchingLocation}>
           <div className="form-header-card">
             <h2>Challan Details Form</h2>
           </div>
@@ -399,7 +438,7 @@ ${row('PRIOR WARNING COUNT FOR THIS ID / LOCATION', String(f.warning_count ?? '0
                       disabled={isFetchingLocation}
                       className="px-3 py-2 bg-card text-ink border border-border rounded-sm text-sm font-medium hover:bg-surface-inset whitespace-nowrap"
                     >
-                      {isFetchingLocation ? 'Fetching...' : 'Fetch Location'}
+                      {isFetchingLocation ? <span className="inline-flex items-center gap-2"><EqualizerLoader label="Fetching location" /> Fetching…</span> : 'Fetch Location'}
                     </button>
                   </div>
                 </div>
@@ -475,38 +514,71 @@ ${row('PRIOR WARNING COUNT FOR THIS ID / LOCATION', String(f.warning_count ?? '0
               <div className="fieldset-body">
                 <div className="field-group">
                   <label>Attach Violation Photo (Optional)</label>
-                  <input 
-                    type="file" 
+                  <input
+                    ref={cameraInputRef}
+                    className="photo-input"
+                    type="file"
                     accept="image/jpeg,image/png,image/heic"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 5 * 1024 * 1024) {
-                        alert('Image size exceeds 5 MB limit.');
-                        return;
-                      }
-                      try {
-                        const compressedBlob = await compressImage(file);
-                        const compressedFile = new File([compressedBlob], file.name, { type: 'image/jpeg' });
-                        setViolationImage(compressedFile);
-                        setViolationImagePreviewUrl(URL.createObjectURL(compressedBlob));
-                      } catch {
-                        alert('Failed to compress image.');
-                      }
-                    }}
+                    capture="environment"
+                    onChange={handleViolationPhotoChange}
+                    tabIndex={-1}
+                    aria-hidden="true"
                   />
-                  {violationImagePreviewUrl && (
-                    <div className="mt-2">
-                      <img src={violationImagePreviewUrl} alt="Preview" className="w-24 h-auto rounded-md border" />
-                      <button 
-                        type="button" 
-                        onClick={() => {
-                          setViolationImage(null);
-                          setViolationImagePreviewUrl(null);
-                        }}
-                        className="text-xs text-red-600 mt-1 hover:underline"
+                  <input
+                    ref={galleryInputRef}
+                    className="photo-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/heic"
+                    onChange={handleViolationPhotoChange}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  />
+
+                  {!violationImagePreviewUrl && (
+                    <div className="photo-picker">
+                      <button
+                        type="button"
+                        className="photo-picker-trigger"
+                        aria-expanded={isPhotoPickerOpen}
+                        aria-controls="violation-photo-actions"
+                        onClick={() => setIsPhotoPickerOpen(open => !open)}
                       >
-                        Remove
+                        <span className="photo-picker-icon"><ImagePlus aria-hidden="true" /></span>
+                        <span>
+                          <strong>Add a violation photo</strong>
+                          <small>Tap to use your camera or choose an image</small>
+                        </span>
+                      </button>
+
+                      {isPhotoPickerOpen && (
+                        <div id="violation-photo-actions" className="photo-picker-actions" role="group" aria-label="Choose photo source">
+                          <button type="button" className="photo-source camera" onClick={() => cameraInputRef.current?.click()}>
+                            <Camera aria-hidden="true" />
+                            <span><strong>Take photo</strong><small>Open camera</small></span>
+                          </button>
+                          <button type="button" className="photo-source" onClick={() => galleryInputRef.current?.click()}>
+                            <ImagePlus aria-hidden="true" />
+                            <span><strong>Choose from gallery</strong><small>Upload an existing image</small></span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {violationImagePreviewUrl && (
+                    <div className="photo-preview">
+                      <img src={violationImagePreviewUrl} alt="Selected violation photo" />
+                      <div className="photo-preview-copy">
+                        <strong>Photo attached</strong>
+                        <span>Ready to include with this challan</span>
+                      </div>
+                      <button
+                        type="button" 
+                        onClick={removeViolationPhoto}
+                        className="remove-photo"
+                        aria-label="Remove selected photo"
+                      >
+                        <X aria-hidden="true" />
+                        <span>Remove</span>
                       </button>
                     </div>
                   )}
@@ -552,10 +624,10 @@ ${row('PRIOR WARNING COUNT FOR THIS ID / LOCATION', String(f.warning_count ?? '0
 
             <div className="form-actions">
               <button type="button" id="print-btn" onClick={() => handleSaveAndPrint('print')} disabled={isGenerating}>
-                <Printer className="w-4 h-4 mr-2" aria-hidden="true" /> Print
+                {isGenerating ? <EqualizerLoader label="Saving challan" /> : <Printer className="w-4 h-4 mr-2" aria-hidden="true" />} Print
               </button>
               <button type="button" id="generate-btn" onClick={() => handleSaveAndPrint('pdf')} disabled={isGenerating}>
-                {isGenerating ? 'Saving…' : <><FileDown className="w-4 h-4 mr-2" aria-hidden="true" /> Save &amp; Download</>}
+                {isGenerating ? <><EqualizerLoader label="Saving challan" /> Saving…</> : <><FileDown className="w-4 h-4 mr-2" aria-hidden="true" /> Save &amp; Download</>}
               </button>
             </div>
           </form>
@@ -639,7 +711,7 @@ ${row('PRIOR WARNING COUNT FOR THIS ID / LOCATION', String(f.warning_count ?? '0
                 {violationImagePreviewUrl && (
                   <div className="violation-photo-block">
                     <p className="detail-label">VIOLATION PHOTO</p>
-                    <img src={violationImagePreviewUrl} className="violation-photo" />
+                    <img src={violationImagePreviewUrl} alt="Violation photo" className="violation-photo" />
                   </div>
                 )}
 

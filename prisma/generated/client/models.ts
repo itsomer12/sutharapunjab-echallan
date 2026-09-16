@@ -11,4 +11,5 @@
 export type * from './models/User'
 export type * from './models/Challan'
 export type * from './models/NoticeCounter'
+export type * from './models/ReportRecipient'
 export type * from './commonInputTypes'
